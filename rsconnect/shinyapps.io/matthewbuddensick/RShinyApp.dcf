@@ -1,0 +1,13 @@
+name: RShinyApp
+title: RShinyApp
+username:
+account: matthewbuddensick
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6483048
+bundleId: 6004416
+url: https://matthewbuddensick.shinyapps.io/RShinyApp/
+when: 1655155098.68787
+lastSyncTime: 1655155098.68787
+asMultiple: FALSE
+asStatic: FALSE

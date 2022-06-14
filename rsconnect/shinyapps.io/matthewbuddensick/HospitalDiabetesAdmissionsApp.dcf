@@ -1,0 +1,14 @@
+name: HospitalDiabetesAdmissionsApp
+title: HospitalDiabetesAdmissionsApp
+username:
+account: matthewbuddensick
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6483158
+bundleId: 6006500
+url: https://matthewbuddensick.shinyapps.io/HospitalDiabetesAdmissionsApp/
+when: 1655214144.62403
+lastSyncTime: 1655214144.62403
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Data/diabetic_data.csv|Data/IDs_mapping.csv
