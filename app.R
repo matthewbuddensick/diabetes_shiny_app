@@ -14,8 +14,8 @@ library(shiny)
 library(tidyverse)
 
 
-diabetic_data <- read_csv("diabetic_data.csv", na = "?")
-id_mapping <- read_csv("IDs_mapping.csv")
+diabetic_data <- read_csv("./diabetic_data.csv", na = "?")
+id_mapping <- read_csv("./IDs_mapping.csv")
 
 # admission_type_id 
 admission_type_data <- id_mapping %>%
@@ -46,27 +46,29 @@ cleaned_databetic_data <- diabetic_data %>%
          
 # Define UI for application
 ui <- fluidPage(
-
   # Application title
   titlePanel(h3("Diabetes in 130 US hospitals (1999-2008)")),
   titlePanel(h5("Information on Data: https://www.kaggle.com/datasets/brandao/diabetes")),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("selectDemoChart", label = "Select Chart Demographic", 
-                  choices = c("Race", "Gender", "Age")),
-      selectInput("selectAdmissionType", label = "Select Admission Type", 
-                  choices = unique(cleaned_databetic_data$admission_type), 
-                  multiple = T, selected = "Emergency"),
-      selectInput("selectAdmissionSource", label = "Select Admission Source", 
-                  choices = unique(cleaned_databetic_data$admission_source), 
-                  multiple = T, selected = "Physician Referral"),
-      selectInput("selectDischargeDisposition", label = "Select Discharge Disposition", 
-                  choices = unique(cleaned_databetic_data$discharge_disposition), 
-                  multiple = T, selected = "Discharged to home")),
-    mainPanel(
-         plotOutput("selectDemoChart")
+  tabsetPanel(
+    tabPanel("Demographics",
+             # Sidebar with a slider input for number of bins 
+             sidebarLayout(position = "left",
+                           sidebarPanel(
+                             selectInput("selectDemoChart", label = "Select Chart Demographic", 
+                                         choices = c("Race", "Gender", "Age")),
+                             selectInput("selectAdmissionType", label = "Select Admission Type", 
+                                         choices = unique(cleaned_databetic_data$admission_type), 
+                                         multiple = T, selected = "Emergency"),
+                             selectInput("selectAdmissionSource", label = "Select Admission Source", 
+                                         choices = unique(cleaned_databetic_data$admission_source), 
+                                         multiple = T, selected = "Physician Referral"),
+                             selectInput("selectDischargeDisposition", label = "Select Discharge Disposition", 
+                                         choices = unique(cleaned_databetic_data$discharge_disposition), 
+                                         multiple = T, selected = "Discharged to home")),
+                           mainPanel(
+                             plotOutput("selectDemoChart")
+                           )
+             )
     )
   )
 )
