@@ -64,13 +64,16 @@ ui <- fluidPage(
                                          choices = c("Race", "Gender", "Age")),
                              pickerInput("selectAdmissionType", label = "Select Admission Type", 
                                          choices = unique(cleaned_databetic_data$admission_type), 
-                                         multiple = T, options = list(`actions-box` = TRUE)),
+                                         multiple = T, options = list(`actions-box` = TRUE),
+                                         selected = unique(cleaned_databetic_data$admission_type)),
                              pickerInput("selectAdmissionSource", label = "Select Admission Source", 
                                          choices = unique(cleaned_databetic_data$admission_source), 
-                                         multiple = T, options = list(`actions-box` = TRUE)),
+                                         multiple = T, options = list(`actions-box` = TRUE),
+                                         selected = unique(cleaned_databetic_data$admission_source)),
                              pickerInput("selectDischargeDisposition", label = "Select Discharge Disposition", 
                                          choices = unique(cleaned_databetic_data$discharge_disposition), 
-                                         multiple = T, options = list(`actions-box` = TRUE))),
+                                         multiple = T, options = list(`actions-box` = TRUE),
+                                         selected = unique(cleaned_databetic_data$discharge_disposition))),
                            mainPanel(
                              plotOutput("demoChart")
                            )
@@ -83,10 +86,12 @@ ui <- fluidPage(
                                          min = 1, max = 14, value = c(1, 14)),
                              pickerInput("selectReadmission", label = "Select Readmission Time", 
                                          choices = unique(cleaned_databetic_data$readmitted), 
-                                         multiple = T, options = list(`actions-box` = TRUE)),
+                                         multiple = T, options = list(`actions-box` = TRUE),
+                                         selected = unique(cleaned_databetic_data$readmitted)),
                              pickerInput("selectDiabetesMed", label = "Select Diabetes Medicaiton", 
                                          choices = unique(cleaned_databetic_data$diabetesMed), 
-                                         multiple = T, options = list(`actions-box` = TRUE))),
+                                         multiple = T, options = list(`actions-box` = TRUE),
+                                         selected = unique(cleaned_databetic_data$diabetesMed))),
                            mainPanel(
                              tableOutput("stayInHospital")
                            )
