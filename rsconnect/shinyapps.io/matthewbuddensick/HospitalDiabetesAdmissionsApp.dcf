@@ -5,10 +5,10 @@ account: matthewbuddensick
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6483158
-bundleId: 6007803
+bundleId: 6008255
 url: https://matthewbuddensick.shinyapps.io/HospitalDiabetesAdmissionsApp/
-when: 1655236726.73765
-lastSyncTime: 1655236726.73765
+when: 1655247089.625
+lastSyncTime: 1655247089.625
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: Data/diabetic_data.csv|Data/IDs_mapping.csv
