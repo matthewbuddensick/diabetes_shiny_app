@@ -11,6 +11,7 @@
 # https://www.kaggle.com/datasets/brandao/diabetes
 
 library(shiny)
+library(shinyWidgets)
 library(tidyverse)
 
 
@@ -43,7 +44,13 @@ cleaned_databetic_data <- diabetic_data %>%
   left_join(admission_source_data, by = c("admission_source_id")) %>% 
   select(-c(admission_type_id, discharge_disposition_id, admission_source_id)) %>% 
   mutate(race = ifelse(race == "AfricanAmerican", "African American", race))
-         
+
+cleaned_databetic_data %>% 
+  select(race, gender, age, time_in_hospital, num_lab_procedures, num_procedures,
+         number_emergency, readmitted, medical_specialty, number_diagnoses) %>% 
+  mutate(medical_specialty = ifelse(is.na(medical_specialty), "Unknown", medical_specialty))
+
+
 # Define UI for application
 ui <- fluidPage(
   # Application title
@@ -56,32 +63,52 @@ ui <- fluidPage(
                            sidebarPanel(
                              selectInput("selectDemoChart", label = "Select Chart Demographic", 
                                          choices = c("Race", "Gender", "Age")),
-                             selectInput("selectAdmissionType", label = "Select Admission Type", 
+                             pickerInput("selectAdmissionType", label = "Select Admission Type", 
                                          choices = unique(cleaned_databetic_data$admission_type), 
-                                         multiple = T, selected = "Emergency"),
-                             selectInput("selectAdmissionSource", label = "Select Admission Source", 
+                                         multiple = T, options = list(`actions-box` = TRUE)),
+                             pickerInput("selectAdmissionSource", label = "Select Admission Source", 
                                          choices = unique(cleaned_databetic_data$admission_source), 
-                                         multiple = T, selected = "Physician Referral"),
-                             selectInput("selectDischargeDisposition", label = "Select Discharge Disposition", 
+                                         multiple = T, options = list(`actions-box` = TRUE)),
+                             pickerInput("selectDischargeDisposition", label = "Select Discharge Disposition", 
                                          choices = unique(cleaned_databetic_data$discharge_disposition), 
-                                         multiple = T, selected = "Discharged to home")),
+                                         multiple = T, options = list(`actions-box` = TRUE))),
                            mainPanel(
-                             plotOutput("selectDemoChart")
+                             plotOutput("demoChart")
                            )
+             )
+    ),
+    tabPanel("Hospital Data",
+             sidebarLayout(position = "left",
+                           sidebarPanel(
+                             sliderInput("selectTimeInHospital", label = "Select Days in Hospital",
+                                         min = 1, max = 14, value = c(1, 14)),
+                             pickerInput("selectAdmissionType", label = "Select Admission Type", 
+                                         choices = unique(cleaned_databetic_data$admission_type), 
+                                         multiple = T, options = list(`actions-box` = TRUE)),
+                             pickerInput("selectAdmissionSource", label = "Select Admission Source", 
+                                         choices = unique(cleaned_databetic_data$admission_source), 
+                                         multiple = T, options = list(`actions-box` = TRUE)),
+                             pickerInput("selectDischargeDisposition", label = "Select Discharge Disposition", 
+                                         choices = unique(cleaned_databetic_data$discharge_disposition), 
+                                         multiple = T, options = list(`actions-box` = TRUE))),
+             mainPanel(
+               tableOutput("stayInHospital")
              )
     )
   )
 )
+)
+
 
 # Define server logic
 server <- function(input, output) {
   
+  ## First Tab Panel
   filtered_diabetic_data <- reactive({cleaned_databetic_data %>% 
     filter(admission_type %in% input$selectAdmissionType & admission_source %in% input$selectAdmissionSource &
              discharge_disposition %in% input$selectDischargeDisposition)})
   
-  output$selectDemoChart <- renderPlot({
-    # generate bins based on input$bins from ui.R
+  output$demoChart <- renderPlot({
     if (input$selectDemoChart == "Race") {
       ggplot(filtered_diabetic_data() %>% 
                group_by(race) %>% 
@@ -125,7 +152,16 @@ server <- function(input, output) {
         geom_text(aes(label = Frequency), vjust = -0.5)
     }
   }, res = 96)
+  
+  
+  # Second Tab Panel
+  output$stayInHospital <- renderTable({
+    cleaned_databetic_data %>% 
+      select(race, gender, age, time_in_hospital, num_lab_procedures, num_procedures,
+             number_emergency, readmitted, medical_specialty, number_diagnoses) %>% 
+      mutate(medical_specialty = ifelse(is.na(medical_specialty), "Unknown", medical_specialty))
+  })
 }
 
 # Run the application 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, options = list(height = 1300))
