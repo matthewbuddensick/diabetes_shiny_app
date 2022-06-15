@@ -50,15 +50,6 @@ cleaned_diabetic_data <- diabetic_data %>%
            readmitted == ">30" ~ "Readmission >30 days",
            readmitted == "<30" ~ "Readmission <30 days")) 
 
-cleaned_diabetic_data %>% 
-  group_by(age) %>% 
-  count() %>% 
-  rename(Patients = n) %>% 
-  rename_with(tools::toTitleCase)
-
-
-
-
 # Define UI for application
 ui <- fluidPage(
   # Application title
