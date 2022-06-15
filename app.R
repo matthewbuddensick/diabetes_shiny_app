@@ -94,7 +94,7 @@ ui <- fluidPage(
                                          choices = unique(cleaned_diabetic_data$readmitted), 
                                          multiple = T, options = list(`actions-box` = TRUE),
                                          selected = unique(cleaned_diabetic_data$readmitted)),
-                             pickerInput("selectDiabetesMed", label = "Select Diabetes Medicaiton", 
+                             pickerInput("selectDiabetesMed", label = "Select Diabetes Medication", 
                                          choices = unique(cleaned_diabetic_data$diabetesMed), 
                                          multiple = T, options = list(`actions-box` = TRUE),
                                          selected = unique(cleaned_diabetic_data$diabetesMed)),
@@ -130,6 +130,7 @@ server <- function(input, output) {
       select(patient_nbr, race, gender, age, admission_source, admission_type, discharge_disposition,
              time_in_hospital)
   }, options = list(pageLength = 5, buttons = c("csv, excel")))
+  
   output$demoChart <- renderPlot({
     if (input$selectDemoChart == "race") {
       ggplot(demographic_diabetic_data() %>% 
