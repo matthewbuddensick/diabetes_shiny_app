@@ -1,5 +1,6 @@
-diabetic_data <- read_csv("./diabetic_data.csv", na = "?")
-id_mapping <- read_csv("./IDs_mapping.csv")
+library(tidyverse)
+diabetic_data <- read_csv("diabetic_data.csv", na = "?")
+id_mapping <- read_csv("IDs_mapping.csv")
 
 # admission_type_id 
 admission_type_data <- id_mapping %>%
@@ -31,5 +32,7 @@ cleaned_diabetic_data <- diabetic_data %>%
          readmitted = case_when(
            readmitted == "NO" ~ "No Readmission",
            readmitted == ">30" ~ "Readmission >30 days",
-           readmitted == "<30" ~ "Readmission <30 days")) %>% 
+           readmitted == "<30" ~ "Readmission <30 days"),
+         race = ifelse(is.na(race), "Unknown", race)) %>%
   write_csv("cleaned_diabetic_data.csv")
+
