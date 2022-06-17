@@ -61,3 +61,5 @@ xgboost_res %>% unnest(.predictions) %>%
   
 # Not the best fit but will go ahead and put it in the app
 # Can work on better performance later if needed
+
+saveRDS(xgboost_res, "readmission_model.rds")
