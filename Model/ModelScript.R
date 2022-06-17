@@ -2,7 +2,7 @@
 library(tidyverse)
 library(tidymodels)
 
-cleaned_diabetic_data <- read_csv("C://Users//Matthew//Desktop//R Shiny//Apps//Repo//Diabetes 130-US hospitals//RShinyApp//Data//cleaned_diabetic_data.csv")
+cleaned_diabetic_data <- read_csv("cleaned_diabetic_data.csv")
 
 model_data <- cleaned_diabetic_data %>% 
   select(race, gender, age, time_in_hospital, max_glu_serum, A1Cresult,
