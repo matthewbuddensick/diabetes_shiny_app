@@ -20,8 +20,7 @@ testing_data <- testing(data_split)
 model_recipe <- recipe(readmitted ~ ., data = training_data) %>% 
   step_other(admission_type, discharge_disposition, admission_source, threshold = 150) %>% 
   step_other(medical_specialty, threshold = 50) %>% 
-  step_dummy(all_nominal_predictors()) %>% 
-  themis::step_downsample(readmitted)
+  step_dummy(all_nominal_predictors())
 
 # Create cross validation object
 folds <- vfold_cv(training_data, v = 3)
@@ -46,10 +45,19 @@ xgboost_tune <- xgboost_wf %>%
     grid = xgboost_grid
   )
 
-xgboost_tune %>% 
-  show_best("roc_auc")
+xgboost_param <- xgboost_tune %>% 
+  select_best("roc_auc")
 
+final_xgboost <- finalize_model(xgboost_mod, xgboost_param)
 
+xgboost_final_wf <- workflow() %>% 
+  add_recipe(model_recipe) %>% 
+  add_model(final_xgboost)
 
+xgboost_res <- last_fit(xgboost_final_wf, data_split)
 
+xgboost_res %>% unnest(.predictions) %>% 
+  conf_mat(truth = readmitted, estimate = .pred_class)
   
+# Not the best fit but will go ahead and put it in the app
+# Can work on better performance later if needed
