@@ -12,10 +12,13 @@
 
 library(shiny)
 library(shinyWidgets)
+library(tidymodels)
 library(tidyverse)
+library(xgboost)
 
 
 cleaned_diabetic_data <- read_csv("Data/cleaned_diabetic_data.csv")
+readmission_model <- readRDS("Model/readmission_model.rds")
 
 # Define UI for application
 ui <- fluidPage(
@@ -70,6 +73,67 @@ ui <- fluidPage(
                              plotOutput("readmission"), plotOutput("diagnoses")
                            )
              )
+    ),
+    tabPanel("Readmission Prediction",
+             fluidRow(
+               column(3, numericInputIcon("modelTimeInHospital",
+                                     label = "Select Days in Hospital",
+                                     min = 1, max = 14, value = 1, width = "100%",
+                                     help_text = "Value must be between 1 and 14")),
+               column(3, selectInput("modelRace", label = "Select Race", 
+                                     choices = unique(cleaned_diabetic_data$race), width = "100%")),
+               column(3, selectInput("modelGender", label = "Select Gender",
+                                     choices = unique(cleaned_diabetic_data$gender), width = "100%")),
+               column(3, selectInput("modelAge", label = "Select Age",
+                                     choices = unique(cleaned_diabetic_data$age), width = "100%"))
+             ),
+             fluidRow(
+               column(3, selectInput("modelMaxGluSerum",
+                                     label = "Select Glucose Serum Test Result",
+                                     choices = unique(cleaned_diabetic_data$max_glu_serum), width = "100%")),
+               column(3, selectInput("modelA1Cresult", label = "Select A1C Test Result", 
+                                     choices = unique(cleaned_diabetic_data$A1Cresult), width = "100%")),
+               column(3, selectInput("modelMed", label = "Select Diabetes Medication",
+                                     choices = unique(cleaned_diabetic_data$diabetesMed), width = "100%")),
+               column(3, selectInput("modelChangeMed", label = "Select Change in Medication",
+                                     choices = c("No Change" = "No", "Changed Medication" = "Ch"), width = "100%"))
+             ),
+             fluidRow(
+               column(3, selectInput("modelMedicalSpeciality",
+                                     label = "Select Medical Specialty",
+                                     choices = unique(cleaned_diabetic_data$medical_specialty), width = "100%")),
+               column(3, selectInput("modelAdmissionType",
+                                     label = "Select Admission Type",
+                                     choices = unique(cleaned_diabetic_data$admission_type), width = "100%")),
+               column(3, selectInput("modelAdmissionSource",
+                                     label = "Select AdmissionSource",
+                                     choices = unique(cleaned_diabetic_data$admission_source), width = "100%")),
+               column(3, selectInput("modelDischargeDisposition",
+                                     label = "Select Discharge Disposition",
+                                     choices = unique(cleaned_diabetic_data$discharge_disposition), width = "100%"))
+             ),
+             fluidRow(
+               column(3, numericInputIcon("modelNumLabProcedures",
+                                          label = "Select Number of Lab Procedures",
+                                          min = 1, max = 132, value = 1, width = "100%",
+                                          help_text = "Value must be between 1 and 132")),
+               column(3, numericInputIcon("modelOutpatient",
+                                          label = "Select Number of Outpatient Visits",
+                                          min = 0, max = 42, value = 1, width = "100%",
+                                          help_text = "Value must be between 0 and 42")),
+               column(3, numericInputIcon("modelInpatient",
+                                          label = "Select Number of Inpatient Visits",
+                                          min = 0, max = 21, value = 1, width = "100%",
+                                          help_text = "Value must be between 0 and 21")),
+               column(3, numericInputIcon("modelEmergency",
+                                          label = "Select Number of Emergency Visits",
+                                          min = 0, max = 76, value = 1, width = "100%",
+                                          help_text = "Value must be between 0 and 76"))
+               
+             ),
+             fluidRow(
+               tableOutput("prediction"), tableOutput("predictionProb")
+             )
     )
   )
 )
@@ -96,7 +160,7 @@ server <- function(input, output) {
     demographic_diabetic_data() %>% 
       select(patient_nbr, race, gender, age, admission_source, admission_type, discharge_disposition,
              time_in_hospital)
-  }, options = list(pageLength = 5, buttons = c("csv, excel")))
+  }, options = list(pageLength = 5))
   
   output$demoChart <- renderPlot({
     if (input$selectDemoChart == "race") {
@@ -262,7 +326,7 @@ server <- function(input, output) {
           summarise(avg_encounters = mean(num_encounters)) %>% 
           distinct() %>% 
           ggplot(aes(y = fct_reorder(medical_specialty, avg_encounters), x = avg_encounters)) +
-          geom_col() +
+          geom_col(fill = "#1b94e4") +
           geom_text(aes(label = round(avg_encounters, 2)), hjust = 1) +
           theme_classic() +
           labs(x = "", y = "", title = "Average Patient Encounters")
@@ -306,6 +370,53 @@ server <- function(input, output) {
       }
     }
   }, res = 96)
+  
+  # Third Tab Panel
+  output$prediction <- renderTable({
+    predict(readmission_model, new_data = tibble(
+      "race" = input$modelRace,
+      "time_in_hospital" = input$modelTimeInHospital,
+      "gender" = input$modelGender,
+      "age" = input$modelAge,
+      "max_glu_serum" = input$modelMaxGluSerum,
+      "A1Cresult" = input$modelA1Cresult,
+      "diabetesMed" = input$modelMed,
+      "change" = input$modelChangeMed,
+      "medical_specialty" = input$modelMedicalSpeciality,
+      "admission_type" = input$modelAdmissionType,
+      "admission_source" = input$modelAdmissionSource,
+      "discharge_disposition" = input$modelDischargeDisposition,
+      "num_lab_procedures" = input$modelNumLabProcedures,
+      "number_outpatient" = input$modelOutpatient,
+      "number_inpatient" = input$modelInpatient,
+      "number_emergency" = input$modelEmergency
+    )) %>% 
+      rename(`Predicted Class` = .pred_class)
+  })
+  
+  output$predictionProb <- renderTable({
+    predict(readmission_model, new_data = tibble(
+      "race" = input$modelRace,
+      "time_in_hospital" = input$modelTimeInHospital,
+      "gender" = input$modelGender,
+      "age" = input$modelAge,
+      "max_glu_serum" = input$modelMaxGluSerum,
+      "A1Cresult" = input$modelA1Cresult,
+      "diabetesMed" = input$modelMed,
+      "change" = input$modelChangeMed,
+      "medical_specialty" = input$modelMedicalSpeciality,
+      "admission_type" = input$modelAdmissionType,
+      "admission_source" = input$modelAdmissionSource,
+      "discharge_disposition" = input$modelDischargeDisposition,
+      "num_lab_procedures" = input$modelNumLabProcedures,
+      "number_outpatient" = input$modelOutpatient,
+      "number_inpatient" = input$modelInpatient,
+      "number_emergency" = input$modelEmergency
+    ), type = "prob") %>% 
+      rename(`No Readmission Probability` = `.pred_No Readmission`,
+             `Readmission in Less Than 30 Days Probability` = `.pred_Readmission <30 days`,
+             `Readmission in More Than 30 Days Probability` = `.pred_Readmission >30 days`)
+  })
 }
 
 # Run the application 
