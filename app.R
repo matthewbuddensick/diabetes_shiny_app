@@ -15,7 +15,7 @@ library(shinyWidgets)
 library(tidyverse)
 
 
-diabetic_data <- read_csv("Data/cleaned_diabetic_data.csv")
+cleaned_diabetic_data <- read_csv("Data/cleaned_diabetic_data.csv")
 
 # Define UI for application
 ui <- fluidPage(
@@ -217,7 +217,7 @@ server <- function(input, output) {
           ggplot(aes(y = fct_reorder(medical_specialty,  avg_diagnoses), x = avg_diagnoses)) +
           geom_col(fill = "#1b94e4") +
           geom_text(aes(label = round(avg_diagnoses, 2), hjust = 1)) +
-          labs(x = "", y = "", title = "Average Diagnoses") +
+          labs(x = "", y = "", title = "Average Patient Diagnoses") +
           theme_classic() +
           theme(legend.position = "none") +
           scale_color_distiller()
@@ -231,7 +231,7 @@ server <- function(input, output) {
           ggplot(aes(x = fct_inorder(age), y = avg_diagnoses, fill = avg_diagnoses)) +
           geom_col() +
           geom_text(aes(label = round(avg_diagnoses, 2), vjust = -0.2)) +
-          labs(x = "", y = "", title = "Average Diagnoses") +
+          labs(x = "", y = "", title = "Average Patient Diagnoses") +
           theme_classic() +
           theme(legend.position = "none")
       }
@@ -244,7 +244,7 @@ server <- function(input, output) {
           ggplot(aes(x = fct_reorder(!!as.symbol(input$selectChartY),  -avg_diagnoses), y = avg_diagnoses)) +
           geom_col(fill = "#1b94e4") +
           geom_text(aes(label = round(avg_diagnoses, 2), vjust = -0.2)) +
-          labs(x = "", y = "", title = "Average Diagnoses") +
+          labs(x = "", y = "", title = "Average Patient Diagnoses") +
           theme_classic() +
           theme(legend.position = "none")
       }
